@@ -6,7 +6,8 @@ import logging
 import paramiko
 import time
 from typing import List
-
+import requests
+import random
 
 
 class WorkerNode:
@@ -26,6 +27,8 @@ class RequestHandler:
     def __init__(self, worker_nodes:List[WorkerNode]):
         self.worker_nodes = [node for node in worker_nodes if node.state == 'ready']
         self.session = None
+        # prev data exists (True) or not (False) [Default == Fasle]
+        self.flag = False
 
         # round robin algorithm initial vairable
         # TODO more algorithm ...
@@ -34,34 +37,36 @@ class RequestHandler:
     async def start(self):
         self.session = ClientSession()
 
-    async def prev_request(self):
+    def prev_request(self):
         global monitor_dict
         for node in self.worker_nodes:
             url = node.container_url
             host = node.node_ip
             start_time = time.time()
             data = {
-                "number": 5000,
+                "number": random.randint(1000, 5000),
             }
             headers = {
                 "tasks_type": "C",
             }
-            async with self.session.post(url=url, data=data, headers=headers) as response:
-                response_data = await response.json()
-                end_time = time.time()
+            requests.post(url=url, data=data, headers=headers)
+            end_time = time.time()
 
-                monitor_dict[host]['hdd'] = 
-
-                
+            monitor_process(self.worker_nodes)
+            monitor_dict[node.node_ip]["response-time"] = end_time - start_time
 
 
     async def forwarding(self, request: Request):
         global monitor_dict
+
+        if not self.flag:
+            self.prev_request()
+            self.flag = True
+
         # round robin algorithm choose urls
         # TODO more algorithm ...
         url = self.worker_nodes[self.current_index].container_url
         self.current_index = (self.current_index + 1) % len(self.worker_nodes)
-
 
         resources_data = dict()
         for key in monitor_dict.keys():
@@ -69,18 +74,15 @@ class RequestHandler:
                 "mem": monitor_dict[key]['mem'],
                 "hdd": monitor_dict[key]['hdd']
             })
-        
+
         # fowarding request with a same session object
         async with self.session.post(url=url, data=await request.post(), headers=request.headers) as response:
             response_data = await response.json()
 
         return web.json_response({"sucess": 1, "response_data": response_data, "resources_data": resources_data})
 
-
     async def close(self):
         await self.session.close()
-
-
 
 
 class LogHandler:
@@ -146,7 +148,6 @@ def init():
     return worker_nodes
 
 
-
 def monitor_process(worker_nodes:List[WorkerNode]):
     global monitor_dict
     def get_mem_usage(container_id, docker_client: docker.APIClient):
@@ -209,7 +210,6 @@ def monitor_process(worker_nodes:List[WorkerNode]):
     try:
         while True:
             for index in range(len(worker_nodes)):
-
                 logger.info(f"[{worker_nodes[index].node_ip}] hdd usage: {get_hdd_usage(worker_nodes[index])}")
     except Exception as e:
         logger.excpetion(e)
@@ -235,15 +235,18 @@ if __name__ == "__main__":
     monitor_dict = process_manager.dict({
         "10.0.10.5": process_manager.dict({
             "hdd": 0,
-            "mem": 0
+            "mem": 0,
+            'response-time': 0,
         }),
         "10.0.10.6": process_manager.dict({
             "hdd": 0,
-            "mem": 0
+            "mem": 0,
+            'response-time': 0,
         }),
         "10.0.10.7": process_manager.dict({
             "hdd": 0,
-            "mem": 0
+            "mem": 0,
+            'response-time': 0,
         }),
     })
     # server process
