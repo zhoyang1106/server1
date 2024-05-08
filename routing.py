@@ -52,7 +52,6 @@ class RequestHandler:
             requests.post(url=url, data=data, headers=headers)
             end_time = time.time()
 
-            monitor_process(self.worker_nodes)
             monitor_dict[node.node_ip]["response-time"] = end_time - start_time
 
 
