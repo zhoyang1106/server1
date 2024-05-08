@@ -1,0 +1,120 @@
+{"10.0.10.5": {"response-time": 1.3170247077941895, "mem": 0.007, "hdd": 0.59}}
+{"10.0.10.7": {"response-time": 0, "mem": 0.009, "hdd": 0.59}}
+{"10.0.10.6": {"response-time": 0, "mem": 0.007, "hdd": 0.57}}
+{"10.0.10.5": {"response-time": 1.3170247077941895, "mem": 0.007, "hdd": 0.59}}
+{"10.0.10.7": {"response-time": 1.2183709144592285, "mem": 0.006, "hdd": 0.59}}
+{"10.0.10.6": {"response-time": 0, "mem": 0.009, "hdd": 0.57}}
+{"10.0.10.5": {"response-time": 1.3170247077941895, "mem": 0.007, "hdd": 0.59}}
+{"10.0.10.7": {"response-time": 1.2183709144592285, "mem": 0.009, "hdd": 0.59}}
+{"10.0.10.6": {"response-time": 1.2812399864196777, "mem": 0.007, "hdd": 0.57}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "29696"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "46080"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "46080"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "21504"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "51200"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "43008"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "51200"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "22528"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "36864"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "45056"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "37888"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "35840"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "38912"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "31744"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "48128"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "25600"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "49152"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "50176"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "31744"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "20480"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "48128"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "41984"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "28672"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "50176"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "43008"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "21504"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "39936"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"10.0.10.5": {"response-time": 1.2527413368225098, "mem": 0.007, "hdd": 0.59}}
+{"10.0.10.7": {"response-time": 0, "mem": 0.006, "hdd": 0.59}}
+{"10.0.10.6": {"response-time": 0, "mem": 0.009, "hdd": 0.57}}
+{"10.0.10.5": {"response-time": 1.2527413368225098, "mem": 0.007, "hdd": 0.59}}
+{"10.0.10.7": {"response-time": 1.2675364017486572, "mem": 0.009, "hdd": 0.59}}
+{"10.0.10.6": {"response-time": 0, "mem": 0.007, "hdd": 0.57}}
+{"10.0.10.5": {"response-time": 1.2527413368225098, "mem": 0.01, "hdd": 0.59}}
+{"10.0.10.7": {"response-time": 1.2675364017486572, "mem": 0.006, "hdd": 0.59}}
+{"10.0.10.6": {"response-time": 1.328986644744873, "mem": 0.007, "hdd": 0.57}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "101376", "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "169984", "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "79872", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "140288", "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "39936"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "21504"}}
+{"request data": {"task-type": "H", "task-hdd-usage": "338944", "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "465920", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "147456", "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "222208", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "169984", "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "29696"}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "44032"}}
+{"request data": {"task-type": "H", "task-hdd-usage": "498688", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "156672", "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "486400", "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "30720"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "34816"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "390144", "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "431104", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "48128"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "296960", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "49152"}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "486400", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "79872", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "M", "task-hdd-usage": 0, "task-mem-usage": "45056"}}
+{"request data": {"task-type": "H", "task-hdd-usage": "264192", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}
+{"request data": {"task-type": "H", "task-hdd-usage": "425984", "task-mem-usage": 0}}
+{"request data": {"task-type": "C", "task-hdd-usage": 0, "task-mem-usage": 0}}

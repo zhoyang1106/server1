@@ -10,7 +10,7 @@ def request_sample():
     # single request sample
     # don't change headers and data
     task_types = ['C', 'M', 'H']
-    task_type = random.choice(task_types[:-1])
+    task_type = random.choice(task_types)
     headers = {
         "task_type": task_type,
     }

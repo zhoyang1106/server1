@@ -11,6 +11,8 @@ import random
 import numpy as np
 import gurobipy as gp # type: ignore
 from gurobipy import GRB # type: ignore
+import sys
+import jsonlines
 
 class WorkerNode:
     def __init__(self, container_url, node_ip, username, password, state, swarm_port, role="worker", container_id=None):
@@ -56,9 +58,11 @@ class RequestHandler:
             }
 
         self.model = gp.Model("server_optimization")
+        self.model.setParam('LogFile', "./gurobi.log")
+        self.model.setParam('LogToConsole', 0)
         self.x = self.model.addVars(len(monitor_dict), vtype=GRB.BINARY, name="x")  # x = 0 or 1
 
-    def LB_algorithm_Min(self, task_hdd_usage = 0, task_mem_usage = 0, task_response_time_predicted = None):
+    def LB_algorithm_Min(self, task_hdd_usage = 0, task_mem_usage = 0):
         global monitor_dict
         # servers_data
         servers_data = dict()
@@ -66,6 +70,7 @@ class RequestHandler:
             servers_data[key] = {
                 "hdd": monitor_dict[key]['hdd'],
                 "mem": monitor_dict[key]['mem'],
+                "response-time": monitor_dict[key]['response-time']
             }
 
         b_hdd = self.model.addVars(1, lb=0.0, ub=1.0, vtype=GRB.CONTINUOUS, name="b_hdd")
@@ -77,19 +82,17 @@ class RequestHandler:
             self.model.setObjective(
                 (self.alpha * (b_hdd[0] / self.server_max_data[key]["hdd"])) +
                 (self.beta * (b_mem[0] / self.server_max_data[key]['mem'])) +
-                self.gamma * gp.quicksum(task_response_time_predicted[i] * self.x[i] for i in range(num_servers)),
-                GRB.MINIMIZE)
+                self.gamma * gp.quicksum(servers_data[key]['response-time'] * self.x[i] for i in range(num_servers)), GRB.MINIMIZE)   # task_response_time_predicted
 
         # Add constraint
         self.model.addConstr(gp.quicksum(self.x[i] for i in range(num_servers)) == 1, "c1")
-        
         for i in range(num_servers):
-            self.model.addConstr(servers_data[self.worker_nodes[i]]['hdd'] + task_hdd_usage * self.x[i] <= self.server_max_data[self.worker_nodes[i]]['hdd'], f"c2_{i + 1}")
-            self.model.addConstr(servers_data[self.worker_nodes[i]]['mem'] + task_mem_usage * self.x[i] <= self.server_max_data[self.worker_nodes[i]]['mem'], f"c3_{i + 1}")
+            self.model.addConstr(servers_data[self.worker_nodes[i].node_ip]['hdd'] + task_hdd_usage * self.x[i] <= self.server_max_data[self.worker_nodes[i].node_ip]['hdd'], f"c2_{i + 1}")
+            self.model.addConstr(servers_data[self.worker_nodes[i].node_ip]['mem'] + task_mem_usage * self.x[i] <= self.server_max_data[self.worker_nodes[i].node_ip]['mem'], f"c3_{i + 1}")
             # b_hdd
-            self.model.addConstr(servers_data[self.worker_nodes[i]]['hdd'] + task_hdd_usage * self.x[i] <= b_hdd[0], f"c4_{i + 1}")
+            self.model.addConstr(servers_data[self.worker_nodes[i].node_ip]['hdd'] + task_hdd_usage * self.x[i] <= b_hdd[0], f"c4_{i + 1}")
             # b_mem
-            self.model.addConstr(servers_data[self.worker_nodes[i]]['mem'] + task_mem_usage * self.x[i] <= b_mem[0], f"c5_{i + 1}")
+            self.model.addConstr(servers_data[self.worker_nodes[i].node_ip]['mem'] + task_mem_usage * self.x[i] <= b_mem[0], f"c5_{i + 1}")
 
         # Optimize model
         self.model.optimize()
@@ -104,7 +107,6 @@ class RequestHandler:
 
 
 
-
     async def start(self):
         self.session = ClientSession()
 
@@ -114,16 +116,26 @@ class RequestHandler:
             url = node.container_url
             start_time = time.time()
             data = {
-                "number": random.randint(1000, 5000),
+                "number": 80000,
             }
             headers = {
-                "tasks_type": "C",
+                "task_type": "C",
             }
-            requests.post(url=url, data=data, headers=headers)
+            response = requests.post(url=url, data=data, headers=headers)
             end_time = time.time()
 
             monitor_dict[node.node_ip]["response-time"] = end_time - start_time
 
+            with jsonlines.open('./request-data.jsonl', 'a') as f:
+                for key in monitor_dict.keys():
+                    f.write({key: {
+                        "response-time": monitor_dict[key]['response-time'],
+                        "mem": monitor_dict[key]['mem'],
+                        "hdd": monitor_dict[key]['hdd']
+                        }
+                    })
+
+        print(response.json())
 
     async def forwarding(self, request: Request):
         global monitor_dict
@@ -140,11 +152,14 @@ class RequestHandler:
         task_hdd_usage = data.get('size') if headers['task_type'] == 'H' else 0
         task_mem_usage = data.get('size') if headers['task_type'] == 'M' else 0
 
-        response_time_list = []
-        for key in monitor_dict.keys():
-            response_time_list.append(monitor_dict[key]['response-time'])
+        with jsonlines.open("./request-data.jsonl", "a") as f:
+            f.write({"request data": {
+                "task-type": headers["task_type"],
+                "task-hdd-usage": task_hdd_usage,
+                "task-mem-usage": task_mem_usage,
+            }})
 
-        url, node_ip = self.LB_algorithm_Min(task_hdd_usage=task_hdd_usage, task_mem_usage=task_mem_usage, task_response_time_predicted=response_time_list)
+        url, node_ip = self.LB_algorithm_Min(task_hdd_usage=task_hdd_usage, task_mem_usage=task_mem_usage)
         # url = self.worker_nodes[self.current_index].container_url
         # self.current_index = (self.current_index + 1) % len(self.worker_nodes)
 
@@ -161,7 +176,7 @@ class RequestHandler:
         async with self.session.post(url=url, data=data, headers=request.headers) as response:
             response_data = await response.json()
             end_time = time.time()
-            monitor_dict[node_ip]['response-time'] = end_time - start_time # seconds
+            monitor_dict[node_ip]['response-time'] = round(end_time - start_time, 4) # seconds
         return web.json_response({"sucess": 1, "response_data": response_data, "resources_data": resources_data})
 
     async def close(self):
@@ -232,8 +247,8 @@ def init():
 
 
 def monitor_process(worker_nodes:List[WorkerNode]):
-    global monitor_dict
     def get_mem_usage(container_id, docker_client: docker.APIClient):
+        global monitor_dict
         host = docker_client.info()['Swarm']["NodeAddr"]
         if container_id:
             container = docker_client.containers(filters={'id': container_id})
@@ -249,6 +264,7 @@ def monitor_process(worker_nodes:List[WorkerNode]):
     
 
     def get_hdd_usage(node:WorkerNode):
+        global monitor_dict
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(node.node_ip, username=node.node_username, password=node.node_password)
@@ -320,8 +336,8 @@ if __name__ == "__main__":
         monitor_dict[node.node_ip] = process_manager.dict({
                 "hdd": 0,
                 "mem": 0,
-                'response-time': 0,
-            }),
+                "response-time": 0,
+            })
     # server process
     proc1 = multiprocessing.Process(target=server_process, args=(worker_nodes,))
     proc1.start()
@@ -330,4 +346,3 @@ if __name__ == "__main__":
     monitor_process(worker_nodes=worker_nodes)
 
     proc1.join()
-    pass
