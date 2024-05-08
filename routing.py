@@ -8,7 +8,9 @@ import time
 from typing import List
 import requests
 import random
-
+import numpy as np
+import gurobipy as gp # type: ignore
+from gurobipy import GRB # type: ignore
 
 class WorkerNode:
     def __init__(self, container_url, node_ip, username, password, state, swarm_port, role="worker", container_id=None):
@@ -21,18 +23,87 @@ class WorkerNode:
         self.swarm_port = swarm_port
         self.role = role
 
+        
+
 
 class RequestHandler:
     # with out add and minuse worker nodes until kill this program
     def __init__(self, worker_nodes:List[WorkerNode]):
+        global monitor_dict
         self.worker_nodes = [node for node in worker_nodes if node.state == 'ready']
         self.session = None
         # prev data exists (True) or not (False) [Default == Fasle]
         self.flag = False
 
+        self.alpha = 0.5
+        self.beta = 0.3
+        self.gamma = 0.2
+
+        self.hdd_max = 0.9875
+        self.mem_max = 1.0
+
         # round robin algorithm initial vairable
         # TODO more algorithm ...
         self.current_index = 0
+
+        # servers_max_data
+        self.server_max_data = dict()
+        for key in monitor_dict.keys():
+            self.server_max_data[key] = {
+                "hdd": 0.9875,
+                "mem": 1.0
+            }
+
+        self.model = gp.Model("server_optimization")
+        self.x = self.model.addVars(len(monitor_dict), vtype=GRB.BINARY, name="x")  # x = 0 or 1
+
+    def LB_algorithm_Min(self, task_hdd_usage, task_mem_usage, task_response_time_predicted):
+        global monitor_dict
+        # servers_data
+        servers_data = dict()
+        for key in monitor_dict.keys():
+            servers_data[key] = {
+                "hdd": monitor_dict[key]['hdd'],
+                "mem": monitor_dict[key]['mem'],
+            }
+
+        b_hdd = self.model.addVars(1, lb=0.0, ub=1.0, vtype=GRB.CONTINUOUS, name="b_hdd")
+        b_mem = self.model.addVars(1, lb=0.0, ub=1.0, vtype=GRB.CONTINUOUS, name="b_mem")
+        num_servers = len(servers_data)
+        self.x = self.model.addVars(num_servers, vtype=GRB.BINARY, name="x")  # x = 0 or 1
+
+        for key in monitor_dict.keys():
+            self.model.setObjective(
+                (self.alpha * (b_hdd[0] / self.server_max_data[key]["hdd"])) +
+                (self.beta * (b_mem[0] / self.server_max_data[key]['mem'])) +
+                self.gamma * gp.quicksum(task_response_time_predicted[i] * self.x[i] for i in range(num_servers)),
+                GRB.MINIMIZE)
+
+        # Add constraint
+        self.model.addConstr(gp.quicksum(self.x[i] for i in range(num_servers)) == 1, "c1")
+        
+        temp_keys_list = monitor_dict.keys()
+        for i in range(num_servers):
+            self.model.addConstr(servers_data[temp_keys_list[i]]['hdd'] + task_hdd_usage * self.x[i] <= self.server_max_data[temp_keys_list[i]]['hdd'], f"c2_{i + 1}")
+            self.model.addConstr(servers_data[temp_keys_list[i]]['mem'] + task_mem_usage * self.x[i] <= self.server_max_data[temp_keys_list[i]]['mem'], f"c3_{i + 1}")
+            # b_hdd
+            self.model.addConstr(servers_data[temp_keys_list[i]]['hdd'] + task_hdd_usage * self.x[i] <= b_hdd[0], f"c4_{i + 1}")
+            # b_mem
+            self.model.addConstr(servers_data[temp_keys_list[i]]['mem'] + task_mem_usage * self.x[i] <= b_mem[0], f"c5_{i + 1}")
+
+        # Optimize model
+        self.model.optimize()
+
+        # Get result
+        self.selected_server = None
+        if self.model.status == GRB.OPTIMAL:
+            for i in range(num_servers):
+                if self.x[i].X > 0.5:  # if x[i] is closer to 1, then the server is selected
+                    self.selected_server = i
+                    break
+
+
+
 
     async def start(self):
         self.session = ClientSession()

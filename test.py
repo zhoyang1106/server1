@@ -2,6 +2,10 @@ import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
 
+
+def LB_algorithm_Min():
+    global manager_
+
 class RequestHandler:
     global monitor_dict
     def __init__(self, worker_nodes: List[workerNode], servers_data, servers_max_data, task_hdd_usage, task_mem_usage, task_response_time_predicted):
