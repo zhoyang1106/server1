@@ -30,7 +30,8 @@ class RequestHandler:
     # with out add and minuse worker nodes until kill this program
     def __init__(self, worker_nodes:List[WorkerNode]):
         global monitor_dict
-        self.worker_nodes = [node for node in worker_nodes if node.state == 'ready']
+        # without node status check
+        self.worker_nodes = worker_nodes
         self.session = None
         # prev data exists (True) or not (False) [Default == Fasle]
         self.flag = False
@@ -57,7 +58,7 @@ class RequestHandler:
         self.model = gp.Model("server_optimization")
         self.x = self.model.addVars(len(monitor_dict), vtype=GRB.BINARY, name="x")  # x = 0 or 1
 
-    def LB_algorithm_Min(self, task_hdd_usage, task_mem_usage, task_response_time_predicted):
+    def LB_algorithm_Min(self, task_hdd_usage = 0, task_mem_usage = 0, task_response_time_predicted = None):
         global monitor_dict
         # servers_data
         servers_data = dict()
@@ -82,25 +83,24 @@ class RequestHandler:
         # Add constraint
         self.model.addConstr(gp.quicksum(self.x[i] for i in range(num_servers)) == 1, "c1")
         
-        temp_keys_list = monitor_dict.keys()
         for i in range(num_servers):
-            self.model.addConstr(servers_data[temp_keys_list[i]]['hdd'] + task_hdd_usage * self.x[i] <= self.server_max_data[temp_keys_list[i]]['hdd'], f"c2_{i + 1}")
-            self.model.addConstr(servers_data[temp_keys_list[i]]['mem'] + task_mem_usage * self.x[i] <= self.server_max_data[temp_keys_list[i]]['mem'], f"c3_{i + 1}")
+            self.model.addConstr(servers_data[self.worker_nodes[i]]['hdd'] + task_hdd_usage * self.x[i] <= self.server_max_data[self.worker_nodes[i]]['hdd'], f"c2_{i + 1}")
+            self.model.addConstr(servers_data[self.worker_nodes[i]]['mem'] + task_mem_usage * self.x[i] <= self.server_max_data[self.worker_nodes[i]]['mem'], f"c3_{i + 1}")
             # b_hdd
-            self.model.addConstr(servers_data[temp_keys_list[i]]['hdd'] + task_hdd_usage * self.x[i] <= b_hdd[0], f"c4_{i + 1}")
+            self.model.addConstr(servers_data[self.worker_nodes[i]]['hdd'] + task_hdd_usage * self.x[i] <= b_hdd[0], f"c4_{i + 1}")
             # b_mem
-            self.model.addConstr(servers_data[temp_keys_list[i]]['mem'] + task_mem_usage * self.x[i] <= b_mem[0], f"c5_{i + 1}")
+            self.model.addConstr(servers_data[self.worker_nodes[i]]['mem'] + task_mem_usage * self.x[i] <= b_mem[0], f"c5_{i + 1}")
 
         # Optimize model
         self.model.optimize()
 
         # Get result
-        self.selected_server = None
+        selected_server_index = None
         if self.model.status == GRB.OPTIMAL:
             for i in range(num_servers):
                 if self.x[i].X > 0.5:  # if x[i] is closer to 1, then the server is selected
-                    self.selected_server = i
-                    break
+                    selected_server_index = i
+                    return self.worker_nodes[selected_server_index].container_url, self.worker_nodes[selected_server_index].node_ip
 
 
 
@@ -127,7 +127,7 @@ class RequestHandler:
 
     async def forwarding(self, request: Request):
         global monitor_dict
-
+        start_time = time.time()
         # collect resouces data before start request forwarding
         if not self.flag:
             self.prev_request()
@@ -135,20 +135,33 @@ class RequestHandler:
 
         # round robin algorithm choose urls
         # TODO more algorithm ...
-        url = self.worker_nodes[self.current_index].container_url
-        self.current_index = (self.current_index + 1) % len(self.worker_nodes)
+        data = await request.post()
+        headers = request.headers
+        task_hdd_usage = data.get('size') if headers['task_type'] == 'H' else 0
+        task_mem_usage = data.get('size') if headers['task_type'] == 'M' else 0
+
+        response_time_list = []
+        for key in monitor_dict.keys():
+            response_time_list.append(monitor_dict[key]['response-time'])
+
+        url, node_ip = self.LB_algorithm_Min(task_hdd_usage=task_hdd_usage, task_mem_usage=task_mem_usage, task_response_time_predicted=response_time_list)
+        # url = self.worker_nodes[self.current_index].container_url
+        # self.current_index = (self.current_index + 1) % len(self.worker_nodes)
 
         resources_data = dict()
         for key in monitor_dict.keys():
             resources_data[key] = dict({
                 "mem": monitor_dict[key]['mem'],
-                "hdd": monitor_dict[key]['hdd']
+                "hdd": monitor_dict[key]['hdd'],
             })
 
-        # fowarding request with a same session object
-        async with self.session.post(url=url, data=await request.post(), headers=request.headers) as response:
-            response_data = await response.json()
+            
 
+        # fowarding request with a same session object
+        async with self.session.post(url=url, data=data, headers=request.headers) as response:
+            response_data = await response.json()
+            end_time = time.time()
+            monitor_dict[node_ip]['response-time'] = end_time - start_time # seconds
         return web.json_response({"sucess": 1, "response_data": response_data, "resources_data": resources_data})
 
     async def close(self):
@@ -300,25 +313,15 @@ def server_process(worker_nodes:List[WorkerNode]):
 
 
 if __name__ == "__main__":
-    worker_nodes = init()
+    worker_nodes: List[WorkerNode] = init()
     process_manager = multiprocessing.Manager()
-    monitor_dict = process_manager.dict({
-        "10.0.10.5": process_manager.dict({
-            "hdd": 0,
-            "mem": 0,
-            'response-time': 0,
-        }),
-        "10.0.10.6": process_manager.dict({
-            "hdd": 0,
-            "mem": 0,
-            'response-time': 0,
-        }),
-        "10.0.10.7": process_manager.dict({
-            "hdd": 0,
-            "mem": 0,
-            'response-time': 0,
-        }),
-    })
+    monitor_dict = process_manager.dict()
+    for node in worker_nodes:
+        monitor_dict[node.node_ip] = process_manager.dict({
+                "hdd": 0,
+                "mem": 0,
+                'response-time': 0,
+            }),
     # server process
     proc1 = multiprocessing.Process(target=server_process, args=(worker_nodes,))
     proc1.start()
