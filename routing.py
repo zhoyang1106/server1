@@ -42,11 +42,11 @@ class RequestHandler:
         self.beta = 0.3
         self.gamma = 0.2
 
-        self.hdd_max = 0.9875
-        self.mem_max = 1.0
+        self.hdd_max_percent = 0.9875
+        self.mem_max_percent = 1.0
 
-        self.hdd_max_usage = pow(2, 30) * 24
-        self.mem_max_usage = pow(2, 30) * 3.816 * self.mem_max 
+        self.hdd_bytes = pow(2, 30) * 24
+        self.mem_bytes = pow(2, 30) * 3.816 * self.mem_max_percent 
 
         # round robin algorithm initial vairable
         # TODO more algorithm ...
@@ -119,7 +119,7 @@ class RequestHandler:
             url = node.container_url
             start_time = time.time()
             data = {
-                "number": 80000,
+                "number": 8000,
             }
             headers = {
                 "task_type": "C",
@@ -138,7 +138,7 @@ class RequestHandler:
                         }
                     })
 
-        print(response.json())
+            print(response.json())
 
     async def forwarding(self, request: Request):
         global monitor_dict
@@ -152,19 +152,19 @@ class RequestHandler:
         # TODO more algorithm ...
         data = await request.post()
         headers = request.headers
-        task_hdd_usage = data.get('size') if headers['task_type'] == 'H' else 0
-        task_mem_usage = data.get('size') if headers['task_type'] == 'M' else 0
+        task_hdd_usage = int(data.get('size')) if headers['task_type'] == 'H' else 0
+        task_mem_usage = int(data.get('size')) if headers['task_type'] == 'M' else 0
 
 
 
         with jsonlines.open("./request-data.jsonl", "a") as f:
             f.write({"request data": {
                 "task-type": headers["task_type"],
-                "task-hdd-usage": task_hdd_usage / self.hdd_max_usage,
-                "task-mem-usage": task_mem_usage / self.mem_max_usage,
+                "task-hdd-usage": task_hdd_usage / self.hdd_bytes,
+                "task-mem-usage": task_mem_usage / self.mem_bytes,
             }})
 
-        url, node_ip = self.LB_algorithm_Min(task_hdd_usage=task_hdd_usage, task_mem_usage=task_mem_usage)
+        url, node_ip = self.LB_algorithm_Min(task_hdd_usage=task_hdd_usage / self.hdd_bytes, task_mem_usage=task_mem_usage / self.mem_bytes)
         # url = self.worker_nodes[self.current_index].container_url
         # self.current_index = (self.current_index + 1) % len(self.worker_nodes)
 
@@ -174,7 +174,6 @@ class RequestHandler:
                 "mem": monitor_dict[key]['mem'],
                 "hdd": monitor_dict[key]['hdd'],
             })
-
             
 
         # fowarding request with a same session object
@@ -182,7 +181,9 @@ class RequestHandler:
             response_data = await response.json()
             end_time = time.time()
             monitor_dict[node_ip]['response-time'] = round(end_time - start_time, 4) # seconds
-        return web.json_response({"sucess": 1, "response_data": response_data, "resources_data": resources_data})
+            print(response_data)
+        
+            return web.json_response({"sucess": 1, "response_data": response_data, "resources_data": resources_data})
 
     async def close(self):
         await self.session.close()

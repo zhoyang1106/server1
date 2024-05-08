@@ -22,12 +22,12 @@ def request_sample():
     elif task_type == 'M':
         # KBytes
         data = {
-            "size": random.randint(20, 50) * pow(2, 10)
+            "size": random.randint(200, 500) * pow(2, 20)
         }
     elif task_type == "H":
         # KBytes
         data = {
-            "size": random.randint(20, 500) * pow(2, 10)
+            "size": random.randint(2, 5) * pow(2, 20)
         }
     addr = "10.0.10.4"
     port = 8081
@@ -52,7 +52,7 @@ def request_sample():
 def request_process(n: int):
     processes = []
     results = []
-    with concurrent.futures.ProcessPoolExecutor(max_workers=50) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=20) as executor:
         for i in range(n):
             processes.append(executor.submit(request_sample))
         
