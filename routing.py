@@ -41,7 +41,6 @@ class RequestHandler:
         global monitor_dict
         for node in self.worker_nodes:
             url = node.container_url
-            host = node.node_ip
             start_time = time.time()
             data = {
                 "number": random.randint(1000, 5000),
@@ -58,6 +57,7 @@ class RequestHandler:
     async def forwarding(self, request: Request):
         global monitor_dict
 
+        # collect resouces data before start request forwarding
         if not self.flag:
             self.prev_request()
             self.flag = True
