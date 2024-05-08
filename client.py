@@ -37,8 +37,8 @@ def request_sample():
     end_time = time.time()
     if response.status_code:
         response_json = response.json()
-        response_json['request_resource_status'] = data
-        response_json['task_type'] = task_type
+        response_json['request-status'] = data
+        response_json['task-type'] = task_type
         response_json["start-timestamp"] = start_time
         response_json["end-timestamp"] = end_time
         response_json['response-time'] = end_time - start_time
