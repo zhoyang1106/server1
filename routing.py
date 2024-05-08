@@ -1,9 +1,9 @@
 from aiohttp import web, ClientSession
 from aiohttp.web_request import Request
 import multiprocessing
-import docker
+import docker # type: ignore
 import logging
-import paramiko
+import paramiko # type: ignore
 import time
 from typing import List
 import requests
