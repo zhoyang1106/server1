@@ -7,6 +7,7 @@ import paramiko
 import time
 from typing import List
 import requests
+import random
 
 
 class WorkerNode:
@@ -43,12 +44,12 @@ class RequestHandler:
             host = node.node_ip
             start_time = time.time()
             data = {
-                "number": 5000,
+                "number": random.randint(1000, 5000),
             }
             headers = {
                 "tasks_type": "C",
             }
-            response = requests.post(url=url, data=data, headers=headers) 
+            requests.post(url=url, data=data, headers=headers)
             end_time = time.time()
 
             monitor_process(self.worker_nodes)
