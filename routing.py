@@ -45,6 +45,9 @@ class RequestHandler:
         self.hdd_max = 0.9875
         self.mem_max = 1.0
 
+        self.hdd_max_usage = pow(2, 30) * 24
+        self.mem_max_usage = pow(2, 30) * 3.816 * self.mem_max 
+
         # round robin algorithm initial vairable
         # TODO more algorithm ...
         self.current_index = 0
@@ -152,11 +155,13 @@ class RequestHandler:
         task_hdd_usage = data.get('size') if headers['task_type'] == 'H' else 0
         task_mem_usage = data.get('size') if headers['task_type'] == 'M' else 0
 
+
+
         with jsonlines.open("./request-data.jsonl", "a") as f:
             f.write({"request data": {
                 "task-type": headers["task_type"],
-                "task-hdd-usage": task_hdd_usage,
-                "task-mem-usage": task_mem_usage,
+                "task-hdd-usage": task_hdd_usage / self.hdd_max_usage,
+                "task-mem-usage": task_mem_usage / self.mem_max_usage,
             }})
 
         url, node_ip = self.LB_algorithm_Min(task_hdd_usage=task_hdd_usage, task_mem_usage=task_mem_usage)
